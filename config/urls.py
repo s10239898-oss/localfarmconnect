@@ -22,7 +22,9 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('users.urls')),   # ← THIS CONNECTS YOUR APP
+    path('', include('users.urls')),
+    path('messages/', include('users.messaging.urls')),
+    path('api/', include('users.api.urls')),
 ]
 
 if settings.DEBUG:

@@ -254,6 +254,7 @@ class Message(models.Model):
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+    is_automated = models.BooleanField(default=False, db_index=True)
 
     class Meta:
         ordering = ["timestamp"]
@@ -261,6 +262,7 @@ class Message(models.Model):
             models.Index(fields=['conversation', 'timestamp']),
             models.Index(fields=['sender']),
             models.Index(fields=['is_read']),
+            models.Index(fields=['is_automated']),
         ]
 
     def __str__(self):
@@ -272,11 +274,17 @@ class Message(models.Model):
             raise ValidationError("Sender must be a participant in the conversation.")
 
     def save(self, *args, **kwargs):
+        is_new = self.pk is None
         self.full_clean()
         super().save(*args, **kwargs)
         
         # Update conversation timestamp
         self.conversation.save()
+        
+        # Trigger n8n webhook for new buyer messages
+        if is_new and not self.is_automated:
+            from .webhook import trigger_n8n_webhook_async
+            trigger_n8n_webhook_async(self)
 
     def mark_as_read(self):
         """Mark message as read"""

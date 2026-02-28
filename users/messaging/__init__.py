@@ -1,0 +1,3 @@
+"""
+Messaging views for LocalFarmConnect
+"""

@@ -80,11 +80,13 @@
 
           <!-- Message Bubble -->
           <div class="max-w-xs lg:max-w-md px-4 py-3 rounded-2xl
-            {% if message.sender == request.user %}
+            {% if message.is_automated %}
+              bg-gradient-to-r from-amber-500 to-orange-500 text-white
+            {% elif message.sender == request.user %}
               bg-gradient-to-r from-emerald-600 to-green-600 text-white
             {% else %}
               bg-slate-100 text-slate-800
-            %}">
+            {% endif %}">
 
             <!-- Message Content -->
             <p class="text-sm leading-relaxed">
@@ -93,11 +95,13 @@
 
             <!-- Timestamp & Read Status -->
             <div class="flex items-center justify-between mt-2 text-xs
-              {% if message.sender == request.user %}
+              {% if message.is_automated %}
+                text-amber-100
+              {% elif message.sender == request.user %}
                 text-emerald-100
               {% else %}
                 text-slate-400
-              %}">
+              {% endif %}">
 
               <span>{{ message.timestamp|date:"H:i" }}</span>
               
@@ -112,6 +116,13 @@
                     ✓ Sent
                   </span>
                 {% endif %}
+              {% endif %}
+              
+              <!-- Automated indicator -->
+              {% if message.is_automated %}
+                <span class="flex items-center gap-1 text-amber-200">
+                  🤖 Automated
+                </span>
               {% endif %}
 
             </div>

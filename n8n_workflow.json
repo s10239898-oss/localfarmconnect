@@ -1,0 +1,131 @@
+{
+  "name": "LocalFarmConnect Auto Response",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "new-message",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-node",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "webhookId": "new-message"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "auto_reply",
+              "value": "Thank you for your message! Our team will review it and get back to you shortly. For urgent inquiries, please call us directly."
+            },
+            {
+              "name": "secret",
+              "value": "={{ $env.N8N_SECRET_KEY || 'default-secret-key-change-this' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-node",
+      "name": "Set Auto Reply",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8001/api/send-auto-message/",
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "conversation_id": "={{ $json.conversation_id }}",
+          "message": "={{ $json.auto_reply }}"
+        },
+        "options": {},
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "X-AUTO-SECRET",
+              "value": "={{ $json.secret }}"
+            }
+          ]
+        }
+      },
+      "id": "http-request-node",
+      "name": "Send Auto Response",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "json": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond-to-webhook-node",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        850,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set Auto Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Auto Reply": {
+      "main": [
+        [
+          {
+            "node": "Send Auto Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Auto Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "updatedAt": "2026-02-28T06:45:00.000Z"
+}
