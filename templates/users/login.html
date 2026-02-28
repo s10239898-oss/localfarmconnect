@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Login · LocalFarmConnect{% endblock %}
+
+{% block content %}
+<div class="relative min-h-[70vh] flex items-center justify-center px-4">
+
+  <!-- Background gradient glow -->
+  <div class="absolute inset-0 -z-10 bg-gradient-to-br from-emerald-50 via-white to-green-100"></div>
+
+  <!-- Floating blur accents -->
+  <div class="absolute top-10 left-10 w-72 h-72 bg-emerald-200/30 blur-3xl rounded-full -z-10"></div>
+  <div class="absolute bottom-10 right-10 w-72 h-72 bg-green-300/20 blur-3xl rounded-full -z-10"></div>
+
+  <!-- Card -->
+  <div class="w-full max-w-md backdrop-blur-xl bg-white/80 border border-white/40 shadow-2xl rounded-3xl p-8 transition-all duration-500 fade-in">
+
+    <!-- Header -->
+    <div class="flex flex-col items-center mb-8">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center font-bold shadow-lg mb-3">
+        LF
+      </div>
+
+      <h1 class="text-3xl font-bold text-slate-900 tracking-tight">
+        Welcome back
+      </h1>
+
+      <p class="text-sm text-slate-500 mt-1">
+        Sign in to your LocalFarmConnect account
+      </p>
+    </div>
+
+    {% if form.errors %}
+      <div class="mb-6 rounded-2xl border border-red-200 bg-red-50 text-red-700 text-sm px-4 py-3 flex items-center gap-2">
+        <span class="text-lg">⚠</span>
+        Invalid username or password. Please try again.
+      </div>
+    {% endif %}
+
+    <form method="post" class="space-y-5">
+      {% csrf_token %}
+
+      <!-- Username -->
+      <div class="relative">
+        <input
+          type="text"
+          name="username"
+          required
+          placeholder=" "
+          value="{{ form.username.value|default:'' }}"
+          class="peer w-full rounded-xl border border-slate-200 bg-white/70 px-4 pt-5 pb-2 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition"
+        >
+        <label class="absolute left-4 top-2 text-xs text-slate-500 transition-all
+          peer-placeholder-shown:top-3.5
+          peer-placeholder-shown:text-sm
+          peer-placeholder-shown:text-slate-400
+          peer-focus:top-2
+          peer-focus:text-xs
+          peer-focus:text-emerald-600">
+          Username
+        </label>
+      </div>
+
+      <!-- Password -->
+      <div class="relative">
+        <input
+          type="password"
+          name="password"
+          required
+          placeholder=" "
+          class="peer w-full rounded-xl border border-slate-200 bg-white/70 px-4 pt-5 pb-2 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition"
+        >
+        <label class="absolute left-4 top-2 text-xs text-slate-500 transition-all
+          peer-placeholder-shown:top-3.5
+          peer-placeholder-shown:text-sm
+          peer-placeholder-shown:text-slate-400
+          peer-focus:top-2
+          peer-focus:text-xs
+          peer-focus:text-emerald-600">
+          Password
+        </label>
+      </div>
+
+      <!-- Remember -->
+      <div class="flex items-center justify-between text-sm">
+        <label class="inline-flex items-center gap-2 text-slate-600 cursor-pointer">
+          <input type="checkbox"
+                 name="remember"
+                 class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+          Remember me
+        </label>
+      </div>
+
+      <!-- Button -->
+      <button type="submit"
+        class="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:shadow-xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">
+
+        <span class="relative z-10">Log in</span>
+
+        <!-- Hover glow -->
+        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition bg-white/10"></div>
+      </button>
+    </form>
+
+    <!-- Footer -->
+    <p class="mt-8 text-center text-sm text-slate-600">
+      No account?
+      <a href="{% url 'register' %}"
+         class="font-semibold text-emerald-700 hover:text-emerald-800 hover:underline transition">
+        Register here
+      </a>
+    </p>
+
+  </div>
+</div>
+{% endblock %}

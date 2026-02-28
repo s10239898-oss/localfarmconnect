@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Order #{{ order.id }} · Farmer View{% endblock %}
+
+{% block content %}
+<section class="space-y-6 fade-in">
+  <a href="{% url 'farmer-orders' %}" class="text-sm text-slate-500 hover:text-emerald-700">&larr; Back to farmer orders</a>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-2">
+    <div class="lg:col-span-2 bg-white rounded-2xl shadow-md p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-lg font-semibold text-slate-900">Order #{{ order.id }}</h1>
+          <p class="text-xs text-slate-500 mt-1">
+            Buyer: <span class="font-medium text-slate-800">{{ order.buyer.username }}</span>
+          </p>
+        </div>
+        <span class="text-xs font-semibold px-2.5 py-1 rounded-full
+                     {% if order.status == 'pending' %}
+                       bg-amber-50 text-amber-700
+                     {% elif order.status == 'paid' %}
+                       bg-sky-50 text-sky-700
+                     {% elif order.status == 'shipped' %}
+                       bg-purple-50 text-purple-700
+                     {% elif order.status == 'delivered' %}
+                       bg-emerald-50 text-emerald-700
+                     {% else %}
+                       bg-slate-50 text-slate-700
+                     {% endif %}">
+          {{ order.get_status_display }}
+        </span>
+      </div>
+
+      <p class="text-xs text-slate-500">Created: {{ order.created_at }}</p>
+
+      <div class="pt-3 border-t border-slate-100">
+        <h2 class="text-sm font-semibold text-slate-800 mb-2">Your items in this order</h2>
+        <ul class="space-y-2 text-sm text-slate-700">
+          {% for it in order_items %}
+            <li class="flex items-center justify-between">
+              <span>
+                {{ it.product.name }}
+                <span class="text-xs text-slate-400">× {{ it.quantity }}</span>
+              </span>
+              <span class="text-xs text-slate-500">
+                KSh {{ it.price_at_time }} · Subtotal: KSh {{ it.subtotal }}
+              </span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <aside class="bg-white rounded-2xl shadow-md p-5 space-y-3">
+      <h2 class="text-sm font-semibold text-slate-800">Update status</h2>
+      <form method="post" action="{% url 'farmer-order-status' order.id %}" class="space-y-3">
+        {% csrf_token %}
+        <select name="status"
+                class="w-full rounded-xl border-slate-200 text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-white">
+          <option value="confirmed" {% if order.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+          <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Shipped</option>
+          <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+        </select>
+        <button type="submit"
+                class="w-full inline-flex justify-center items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition">
+          Update status
+        </button>
+      </form>
+    </aside>
+  </div>
+</section>
+{% endblock %}
+

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout · LocalFarmConnect{% endblock %}
+
+{% block content %}
+<section class="space-y-6 fade-in">
+  <header class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-semibold text-slate-900">Checkout</h1>
+      <p class="text-sm text-slate-500 mt-1">Review your order and confirm.</p>
+    </div>
+    <a href="{% url 'cart' %}" class="text-sm text-slate-500 hover:text-emerald-700">&larr; Back to cart</a>
+  </header>
+
+  {% if items %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 bg-white rounded-2xl shadow-md p-4 sm:p-6">
+        <h2 class="text-sm font-semibold text-slate-800 mb-4">Order summary</h2>
+        <table class="min-w-full text-sm">
+          <thead class="border-b border-slate-200 text-xs text-slate-500 uppercase tracking-wide">
+            <tr>
+              <th class="text-left py-2 pr-4">Product</th>
+              <th class="text-left py-2 pr-4">Farmer</th>
+              <th class="text-left py-2 pr-4">Price</th>
+              <th class="text-left py-2 pr-4">Qty</th>
+              <th class="text-left py-2 pr-4">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            {% for it in items %}
+              <tr>
+                <td class="py-3 pr-4 text-slate-800">{{ it.product.name }}</td>
+                <td class="py-3 pr-4 text-slate-500">{{ it.product.farmer.farm_name }}</td>
+                <td class="py-3 pr-4 text-slate-700">KSh {{ it.product.price }}</td>
+                <td class="py-3 pr-4 text-slate-700">{{ it.quantity }}</td>
+                <td class="py-3 pr-4 text-slate-800">KSh {{ it.line_total }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <aside class="bg-white rounded-2xl shadow-md p-5 space-y-4">
+        <div>
+          <h2 class="text-sm font-semibold text-slate-800">Total</h2>
+          <p class="mt-1 text-2xl font-semibold text-emerald-700">KSh {{ total }}</p>
+        </div>
+
+        <p class="text-xs text-slate-500">
+          This is a secure checkout. Your order will be created and stock reserved with each farmer.
+        </p>
+
+        <form method="post" class="space-y-2">
+          {% csrf_token %}
+          <button type="submit"
+                  class="w-full inline-flex justify-center items-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 transition">
+            Confirm order
+          </button>
+        </form>
+      </aside>
+    </div>
+  {% else %}
+    <div class="bg-white rounded-2xl shadow-md p-8 text-center text-sm text-slate-500">
+      Your cart is empty.
+      <div class="mt-4">
+        <a href="{% url 'marketplace' %}"
+           class="inline-flex items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition">
+          Browse products
+        </a>
+      </div>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
+

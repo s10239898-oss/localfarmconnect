@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}My Products · LocalFarmConnect{% endblock %}
+
+{% block content %}
+<section class="space-y-8 fade-in">
+
+  <!-- Header -->
+  <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-slate-900 tracking-tight">
+        My products
+      </h1>
+      <p class="text-sm text-slate-500 mt-1">
+        Manage and update your farm listings.
+      </p>
+    </div>
+
+    <a href="{% url 'product-add' %}"
+       class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl
+              bg-emerald-600 text-white text-sm font-semibold shadow-md
+              hover:bg-emerald-700 hover:shadow-lg transition">
+      <span class="text-lg leading-none">＋</span>
+      Add product
+    </a>
+  </header>
+
+
+  {% if products %}
+
+  <!-- Table card -->
+  <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+
+        <!-- Head -->
+        <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200">
+          <tr>
+            <th class="text-left px-6 py-3">Product</th>
+            <th class="text-left px-6 py-3">Category</th>
+            <th class="text-left px-6 py-3">Price</th>
+            <th class="text-left px-6 py-3">Stock</th>
+            <th class="text-right px-6 py-3">Actions</th>
+          </tr>
+        </thead>
+
+        <!-- Body -->
+        <tbody class="divide-y divide-slate-100">
+
+          {% for p in products %}
+          <tr class="hover:bg-slate-50 transition">
+
+            <!-- Product -->
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700 text-xs font-semibold">
+                  {{ p.name|slice:":1" }}
+                </div>
+                <div class="font-semibold text-slate-900">
+                  {{ p.name }}
+                </div>
+              </div>
+            </td>
+
+            <!-- Category -->
+            <td class="px-6 py-4 text-slate-600">
+              {% if p.category %}
+                <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+                  {{ p.category.name }}
+                </span>
+              {% else %}
+                —
+              {% endif %}
+            </td>
+
+            <!-- Price -->
+            <td class="px-6 py-4 font-semibold text-slate-900">
+              KSh {{ p.price }}
+            </td>
+
+            <!-- Stock -->
+            <td class="px-6 py-4">
+              {% if p.quantity_available > 10 %}
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
+                  In stock ({{ p.quantity_available }})
+                </span>
+              {% elif p.quantity_available > 0 %}
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700">
+                  Low stock ({{ p.quantity_available }})
+                </span>
+              {% else %}
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700">
+                  Out of stock
+                </span>
+              {% endif %}
+            </td>
+
+            <!-- Actions -->
+            <td class="px-6 py-4 text-right space-x-2">
+
+              <a href="{% url 'product-edit' p.id %}"
+                 class="inline-flex items-center px-3 py-1.5 rounded-lg
+                        bg-slate-100 text-slate-800 text-xs font-semibold
+                        hover:bg-slate-200 transition">
+                Edit
+              </a>
+
+              <a href="{% url 'product-delete' p.id %}"
+                 class="inline-flex items-center px-3 py-1.5 rounded-lg
+                        bg-red-50 text-red-700 text-xs font-semibold
+                        hover:bg-red-100 transition">
+                Delete
+              </a>
+
+            </td>
+
+          </tr>
+          {% endfor %}
+
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  {% else %}
+
+  <!-- Empty state -->
+  <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-12 text-center">
+
+    <div class="w-16 h-16 mx-auto rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-2xl mb-4">
+      🌱
+    </div>
+
+    <h3 class="text-lg font-semibold text-slate-900">
+      No products yet
+    </h3>
+
+    <p class="text-sm text-slate-500 mt-1">
+      Start selling by adding your first farm product.
+    </p>
+
+    <a href="{% url 'product-add' %}"
+       class="inline-flex items-center gap-2 mt-6 px-5 py-2.5 rounded-xl
+              bg-emerald-600 text-white text-sm font-semibold shadow-md
+              hover:bg-emerald-700 hover:shadow-lg transition">
+      Add your first product
+    </a>
+
+  </div>
+
+  {% endif %}
+
+</section>
+{% endblock %}

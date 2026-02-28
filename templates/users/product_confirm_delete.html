@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Product · LocalFarmConnect{% endblock %}
+
+{% block content %}
+<section class="min-h-[50vh] flex items-center justify-center fade-in">
+  <div class="max-w-md w-full bg-white rounded-2xl shadow-md p-6 space-y-4">
+    <h1 class="text-xl font-semibold text-slate-900">Delete product</h1>
+    <p class="text-sm text-slate-600">
+      Are you sure you want to permanently delete
+      <span class="font-semibold text-slate-900">{{ object.name }}</span>?
+    </p>
+
+    <form method="post" class="flex items-center justify-between pt-4">
+      {% csrf_token %}
+      <a href="{% url 'farmer-products' %}"
+         class="inline-flex items-center rounded-xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-200 transition">
+        Cancel
+      </a>
+      <button type="submit"
+              class="inline-flex items-center rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition">
+        Yes, delete
+      </button>
+    </form>
+  </div>
+</section>
+{% endblock %}
+

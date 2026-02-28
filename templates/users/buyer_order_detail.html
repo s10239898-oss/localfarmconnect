@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Order #{{ order.id }} · LocalFarmConnect{% endblock %}
+
+{% block content %}
+<section class="space-y-6 fade-in">
+  <a href="{% url 'buyer-orders' %}" class="text-sm text-slate-500 hover:text-emerald-700">&larr; Back to orders</a>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-2">
+    <!-- Order info -->
+    <div class="lg:col-span-2 bg-white rounded-2xl shadow-md p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-lg font-semibold text-slate-900">Order #{{ order.id }}</h1>
+          <p class="text-xs text-slate-500 mt-1">{{ order.created_at }}</p>
+        </div>
+        <span class="text-xs font-semibold px-2.5 py-1 rounded-full
+                     {% if order.status == 'pending' %}
+                       bg-amber-50 text-amber-700
+                     {% elif order.status == 'paid' %}
+                       bg-sky-50 text-sky-700
+                     {% elif order.status == 'shipped' %}
+                       bg-purple-50 text-purple-700
+                     {% elif order.status == 'delivered' %}
+                       bg-emerald-50 text-emerald-700
+                     {% else %}
+                       bg-slate-50 text-slate-700
+                     {% endif %}">
+          {{ order.get_status_display }}
+        </span>
+      </div>
+
+      <div class="flex items-center justify-between text-sm">
+        <span class="text-slate-500">Total</span>
+        <span class="text-lg font-semibold text-slate-900">KSh {{ order.total_amount }}</span>
+      </div>
+
+      <div class="pt-3 border-t border-slate-100">
+        <h2 class="text-sm font-semibold text-slate-800 mb-2">Items</h2>
+        <ul class="space-y-2 text-sm text-slate-700">
+          {% for it in order.items.all %}
+            <li class="flex items-center justify-between">
+              <span>
+                {{ it.product.name }}
+                <span class="text-xs text-slate-400">× {{ it.quantity }}</span>
+              </span>
+              <span class="text-xs text-slate-500">
+                KSh {{ it.price_at_time }} · Subtotal: KSh {{ it.subtotal }}
+              </span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Payment -->
+    <aside class="bg-white rounded-2xl shadow-md p-5 space-y-3">
+      <h2 class="text-sm font-semibold text-slate-800">Payment</h2>
+      {% if payment %}
+        <p class="text-sm text-slate-600">
+          Status:
+          <span class="font-semibold">
+            {{ payment.get_status_display }}
+          </span>
+        </p>
+        <p class="text-sm text-slate-600">
+          Amount: <span class="font-semibold">KSh {{ payment.amount }}</span>
+        </p>
+        {% if payment.status != 'completed' %}
+          <form method="post" action="{% url 'buyer-order-pay' order.id %}" class="pt-2">
+            {% csrf_token %}
+            <button type="submit"
+                    class="w-full inline-flex justify-center items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition">
+              Mark as paid (MVP)
+            </button>
+          </form>
+        {% endif %}
+      {% else %}
+        <p class="text-sm text-slate-500">No payment record found.</p>
+      {% endif %}
+    </aside>
+  </div>
+</section>
+{% endblock %}
+

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Farmer Dashboard · LocalFarmConnect{% endblock %}
+
+{% block content %}
+<section class="space-y-8 fade-in">
+
+  <!-- Header -->
+  <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-slate-900 tracking-tight">
+        Farmer dashboard
+      </h1>
+      <p class="text-sm text-slate-500 mt-1">
+        Welcome back,
+        <span class="font-semibold text-emerald-700">
+          {{ request.user.username }}
+        </span>
+      </p>
+    </div>
+  </header>
+
+
+  <!-- Stats -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+
+    <!-- Products -->
+    <div class="bg-gradient-to-br from-white to-slate-50 rounded-2xl shadow-lg p-6
+                hover:shadow-xl hover:-translate-y-0.5 transition">
+      <p class="text-xs uppercase tracking-wider text-slate-400">
+        Total products
+      </p>
+      <p class="text-3xl font-bold text-slate-900 mt-2">
+        {{ total_products|default:0 }}
+      </p>
+    </div>
+
+    <!-- Orders -->
+    <div class="bg-gradient-to-br from-white to-slate-50 rounded-2xl shadow-lg p-6
+                hover:shadow-xl hover:-translate-y-0.5 transition">
+      <p class="text-xs uppercase tracking-wider text-slate-400">
+        Total orders
+      </p>
+      <p class="text-3xl font-bold text-slate-900 mt-2">
+        {{ total_orders|default:0 }}
+      </p>
+    </div>
+
+    <!-- Revenue -->
+    <div class="bg-gradient-to-br from-emerald-50 to-white rounded-2xl shadow-lg p-6
+                hover:shadow-xl hover:-translate-y-0.5 transition">
+      <p class="text-xs uppercase tracking-wider text-emerald-600">
+        Revenue
+      </p>
+      <p class="text-3xl font-bold text-emerald-700 mt-2">
+        {{ total_revenue|default:"KSh 0.00" }}
+      </p>
+    </div>
+
+  </div>
+
+
+  <!-- Quick actions -->
+  <div class="bg-white rounded-2xl shadow-lg p-6 border border-slate-100">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-lg font-semibold text-slate-800">
+        Quick actions
+      </h2>
+    </div>
+
+    <div class="flex flex-wrap gap-4">
+
+      <!-- Add product -->
+      <a href="{% url 'product-add' %}"
+         class="group inline-flex items-center gap-2 px-5 py-3 rounded-xl
+                bg-emerald-600 text-white font-semibold shadow-md
+                hover:bg-emerald-700 hover:shadow-lg transition">
+
+        <span class="group-hover:scale-110 transition">＋</span>
+        Add product
+      </a>
+
+      <!-- Products -->
+      <a href="{% url 'farmer-products' %}"
+         class="inline-flex items-center px-5 py-3 rounded-xl
+                bg-slate-900 text-white font-semibold shadow-md
+                hover:bg-slate-800 hover:shadow-lg transition">
+        Manage products
+      </a>
+
+      <!-- Orders -->
+      <a href="{% url 'farmer-orders' %}"
+         class="inline-flex items-center px-5 py-3 rounded-xl
+                bg-slate-100 text-slate-800 font-semibold
+                hover:bg-slate-200 transition">
+        View orders
+      </a>
+
+    </div>
+  </div>
+
+</section>
+{% endblock %}

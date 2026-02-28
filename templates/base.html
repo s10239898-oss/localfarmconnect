@@ -1,0 +1,124 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}LocalFarmConnect{% endblock %}</title>
+  <!-- Tailwind via CDN for simplicity -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            farm: {
+              green: '#059669',      // emerald
+              greenLight: '#6ee7b7',
+              brown: '#92400e',
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    /* Simple fade-in for cards/pages */
+    .fade-in {
+      animation: fade-in 0.3s ease-out;
+    }
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <!-- Toasts / messages -->
+  <div class="fixed top-4 right-4 space-y-2 z-50">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="fade-in max-w-xs rounded-xl shadow-md px-4 py-3 text-sm
+                    {% if message.tags == 'error' %}
+                      bg-red-50 text-red-800 border border-red-200
+                    {% elif message.tags == 'success' %}
+                      bg-emerald-50 text-emerald-800 border border-emerald-200
+                    {% elif message.tags == 'warning' %}
+                      bg-amber-50 text-amber-800 border border-amber-200
+                    {% else %}
+                      bg-slate-50 text-slate-800 border border-slate-200
+                    {% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <!-- Navbar -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
+    <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+      <div class="flex items-center space-x-2">
+        <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 font-semibold">
+          LF
+        </span>
+        <a href="{% url 'marketplace' %}" class="font-semibold text-lg tracking-tight text-slate-900">
+          LocalFarmConnect
+        </a>
+      </div>
+      <div class="flex items-center space-x-4 text-sm font-medium">
+        {% if request.user.is_authenticated %}
+          {% if request.user.user_type == 'buyer' %}
+            <a href="{% url 'marketplace' %}" class="text-slate-700 hover:text-emerald-700">Marketplace</a>
+            <a href="{% url 'cart' %}" class="text-slate-700 hover:text-emerald-700">Cart</a>
+            <a href="{% url 'buyer-orders' %}" class="text-slate-700 hover:text-emerald-700">My Orders</a>
+            <a href="{% url 'dashboard' %}" class="text-slate-700 hover:text-emerald-700">Dashboard</a>
+          {% elif request.user.user_type == 'farmer' %}
+            <a href="{% url 'farmer-products' %}" class="text-slate-700 hover:text-emerald-700">My Products</a>
+            <a href="{% url 'farmer-orders' %}" class="text-slate-700 hover:text-emerald-700">Orders</a>
+            <a href="{% url 'dashboard' %}" class="text-slate-700 hover:text-emerald-700">Dashboard</a>
+          {% endif %}
+          <form method="post" action="{% url 'logout' %}" class="inline">
+            {% csrf_token %}
+            <button type="submit" class="ml-2 inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 transition">
+              Logout
+            </button>
+          </form>
+        {% else %}
+          <a href="{% url 'login' %}" class="text-slate-700 hover:text-emerald-700">Login</a>
+          <a href="{% url 'register' %}" class="inline-flex items-center rounded-full px-4 py-1.5 text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition">
+            Register
+          </a>
+        {% endif %}
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main content -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-200 bg-white mt-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-xs text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-2">
+      <span>© {{ now|default:2026 }} LocalFarmConnect. Connecting farms and buyers.</span>
+      <span class="text-slate-400">Built with Django.</span>
+    </div>
+  </footer>
+
+  {% block extra_scripts %}
+  <script>
+    // Auto-hide toasts
+    setTimeout(() => {
+      document.querySelectorAll('.fixed.top-4.right-4 > div').forEach(el => {
+        el.style.transition = 'opacity 0.3s ease';
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 300);
+      });
+    }, 3500);
+  </script>
+  {% endblock %}
+</body>
+</html>
+
