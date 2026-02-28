@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Conversation with {{ other_user.username }} · LocalFarmConnect{% endblock %}
+
+{% block content %}
+<section class="relative space-y-8 fade-in">
+  
+  <!-- Background -->
+  <div class="absolute inset-0 -z-10 bg-gradient-to-br from-emerald-50 via-white to-green-100"></div>
+  <div class="absolute bottom-10 left-10 w-72 h-72 bg-emerald-200/30 blur-3xl rounded-full -z-10"></div>
+
+  <!-- Header -->
+  <header class="bg-white/85 backdrop-blur-xl border border-white/40 shadow-xl rounded-2xl p-6">
+    
+    <div class="flex items-center justify-between">
+      
+      <!-- Other User Info -->
+      <div class="flex items-center gap-4">
+        
+        <!-- Back Button -->
+        <a href="{% url 'conversation-list' %}"
+           class="inline-flex items-center justify-center w-10 h-10 rounded-full 
+                  bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+          ←
+        </a>
+
+        <!-- Avatar -->
+        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-green-500 
+                    flex items-center justify-center text-white font-semibold text-lg">
+          {{ other_user.username|slice:":1"|upper }}
+        </div>
+
+        <!-- User Details -->
+        <div>
+          <h1 class="text-xl font-semibold text-slate-900">
+            {{ other_user.username }}
+          </h1>
+          
+          <!-- Product Context -->
+          {% if conversation.product %}
+            <p class="text-sm text-slate-500">
+              About: <a href="{% url 'product-detail' conversation.product.pk %}" 
+                       class="text-emerald-600 hover:text-emerald-700 font-medium">
+                {{ conversation.product.name }}
+              </a>
+            </p>
+          {% else %}
+            <p class="text-sm text-slate-500">
+              General conversation
+            </p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- User Role Badge -->
+      <div class="flex items-center gap-2">
+        <span class="px-3 py-1 rounded-full text-xs font-semibold
+          {% if other_user.user_type == 'farmer' %}
+            bg-emerald-100 text-emerald-700
+          {% else %}
+            bg-blue-100 text-blue-700
+          {% endif %}">
+          {% if other_user.user_type == 'farmer' %}Farmer{% else %}Buyer{% endif %}
+        </span>
+      </div>
+
+    </div>
+
+  </header>
+
+  <!-- Messages Container -->
+  <div class="bg-white/85 backdrop-blur-xl border border-white/40 shadow-xl rounded-2xl 
+              overflow-hidden flex flex-col" style="height: 600px;">
+
+    <!-- Messages List -->
+    <div class="flex-1 overflow-y-auto p-6 space-y-4">
+      
+      {% for message in messages %}
+        <div class="flex {% if message.sender == request.user %}justify-end{% else %}justify-start{% endif %}">
+
+          <!-- Message Bubble -->
+          <div class="max-w-xs lg:max-w-md px-4 py-3 rounded-2xl
+            {% if message.sender == request.user %}
+              bg-gradient-to-r from-emerald-600 to-green-600 text-white
+            {% else %}
+              bg-slate-100 text-slate-800
+            %}">
+
+            <!-- Message Content -->
+            <p class="text-sm leading-relaxed">
+              {{ message.content|linebreaks }}
+            </p>
+
+            <!-- Timestamp & Read Status -->
+            <div class="flex items-center justify-between mt-2 text-xs
+              {% if message.sender == request.user %}
+                text-emerald-100
+              {% else %}
+                text-slate-400
+              %}">
+
+              <span>{{ message.timestamp|date:"H:i" }}</span>
+              
+              <!-- Read Status for own messages -->
+              {% if message.sender == request.user %}
+                {% if message.is_read %}
+                  <span class="flex items-center gap-1">
+                    ✓✓ Read
+                  </span>
+                {% else %}
+                  <span class="flex items-center gap-1">
+                    ✓ Sent
+                  </span>
+                {% endif %}
+              {% endif %}
+
+            </div>
+
+          </div>
+
+        </div>
+      {% empty %}
+
+        <!-- No Messages State -->
+        <div class="text-center py-12">
+          <div class="text-4xl mb-3">💬</div>
+          <p class="text-slate-500">
+            No messages yet. Start the conversation!
+          </p>
+        </div>
+
+      {% endfor %}
+
+    </div>
+
+    <!-- Message Input Form -->
+    <div class="border-t border-slate-200 p-4 bg-white/50">
+      
+      <form method="post" action="{% url 'message-create' conversation.pk %}" 
+            class="flex gap-3">
+
+        {% csrf_token %}
+        
+        <!-- Input Field -->
+        <div class="flex-1">
+          <textarea name="message" 
+                    rows="2" 
+                    placeholder="Type your message..."
+                    class="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm
+                           focus:border-emerald-500 focus:ring-emerald-200 resize-none
+                           bg-white/90 backdrop-blur"></textarea>
+        </div>
+
+        <!-- Send Button -->
+        <button type="submit"
+                class="inline-flex items-center justify-center px-6 py-2 rounded-xl
+                       bg-gradient-to-r from-emerald-600 to-green-600
+                       text-white font-semibold shadow-md
+                       hover:shadow-lg hover:-translate-y-0.5 transition">
+          Send
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- Auto-scroll to bottom -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const messagesContainer = document.querySelector('.overflow-y-auto');
+    if (messagesContainer) {
+      // Scroll to bottom on load
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      
+      // Auto-scroll when new messages are added (for future real-time updates)
+      const observer = new MutationObserver(function() {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      });
+      
+      observer.observe(messagesContainer, {
+        childList: true,
+        subtree: true
+      });
+    }
+  });
+</script>
+
+{% endblock %}

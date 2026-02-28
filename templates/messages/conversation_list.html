@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Messages · LocalFarmConnect{% endblock %}
+
+{% block content %}
+<section class="relative space-y-8 fade-in">
+  
+  <!-- Background -->
+  <div class="absolute inset-0 -z-10 bg-gradient-to-br from-emerald-50 via-white to-green-100"></div>
+  <div class="absolute top-10 right-10 w-72 h-72 bg-emerald-200/30 blur-3xl rounded-full -z-10"></div>
+
+  <!-- Header -->
+  <header>
+    <h1 class="text-3xl font-bold text-slate-900 tracking-tight">
+      {% if request.user.user_type == 'buyer' %}My Conversations{% else %}Customer Messages{% endif %}
+    </h1>
+    <p class="text-sm text-slate-500 mt-1">
+      {% if request.user.user_type == 'buyer' %}
+        Your conversations with farmers
+      {% else %}
+        Messages from interested buyers
+      {% endif %}
+    </p>
+  </header>
+
+  {% if conversations %}
+    <div class="space-y-4">
+      
+      {% for conversation in conversations %}
+        <article class="group rounded-3xl bg-white/85 backdrop-blur-xl border border-white/40
+                        shadow-xl overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+
+          <!-- Conversation Link -->
+          <a href="{% url 'conversation-detail' conversation.pk %}" 
+             class="block p-6 hover:bg-slate-50/60 transition">
+
+            <!-- Header Row -->
+            <div class="flex items-start justify-between mb-3">
+
+              <!-- Other User Info -->
+              <div class="flex items-center gap-3">
+                
+                <!-- Avatar -->
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-green-500 
+                            flex items-center justify-center text-white font-semibold text-lg">
+                  {% if request.user.user_type == 'buyer' %}
+                    {{ conversation.farmer.username|slice:":1"|upper }}
+                  {% else %}
+                    {{ conversation.buyer.username|slice:":1"|upper }}
+                  {% endif %}
+                </div>
+
+                <!-- User Details -->
+                <div>
+                  <h3 class="font-semibold text-slate-900">
+                    {% if request.user.user_type == 'buyer' %}
+                      {{ conversation.farmer.username }}
+                    {% else %}
+                      {{ conversation.buyer.username }}
+                    {% endif %}
+                  </h3>
+                  
+                  <!-- Product Context -->
+                  {% if conversation.product %}
+                    <p class="text-sm text-slate-500">
+                      About: {{ conversation.product.name }}
+                    </p>
+                  {% else %}
+                    <p class="text-sm text-slate-500">
+                      General conversation
+                    </p>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- Timestamp & Unread Badge -->
+              <div class="flex items-center gap-3 text-right">
+                
+                <!-- Time -->
+                <div class="text-xs text-slate-400">
+                  {% if conversation.last_message %}
+                    {{ conversation.last_message.timestamp|date:"H:i" }}
+                  {% else %}
+                    {{ conversation.created_at|date:"H:i" }}
+                  {% endif %}
+                </div>
+
+                <!-- Unread Badge -->
+                {% if conversation.unread_messages > 0 %}
+                  <span class="inline-flex items-center justify-center w-6 h-6 rounded-full 
+                               bg-emerald-600 text-white text-xs font-semibold">
+                    {{ conversation.unread_messages }}
+                  </span>
+                {% endif %}
+              </div>
+
+            </div>
+
+            <!-- Last Message Preview -->
+            <div class="mt-3">
+              {% if conversation.last_message %}
+                <p class="text-sm text-slate-600 line-clamp-2">
+                  <span class="font-medium text-slate-700">
+                    {% if conversation.last_message.sender == request.user %}
+                      You:
+                    {% else %}
+                      {% if request.user.user_type == 'buyer' %}
+                        {{ conversation.farmer.username }}:
+                      {% else %}
+                        {{ conversation.buyer.username }}:
+                      {% endif %}
+                    %}
+                  </span>
+                  {{ conversation.last_message.content }}
+                </p>
+              {% else %}
+                <p class="text-sm text-slate-400 italic">
+                  No messages yet
+                </p>
+              {% endif %}
+            </div>
+
+          </a>
+
+        </article>
+      {% endfor %}
+
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+      <div class="flex items-center justify-center gap-6 text-sm mt-8">
+
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}"
+             class="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition">
+            Previous
+          </a>
+        {% endif %}
+
+        <span class="text-slate-600 font-medium">
+          Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}"
+             class="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition">
+            Next
+          </a>
+        {% endif %}
+
+      </div>
+    {% endif %}
+
+  {% else %}
+    
+    <!-- Empty State -->
+    <div class="rounded-3xl bg-white/85 backdrop-blur-xl border border-white/40
+                shadow-xl p-12 text-center">
+
+      <div class="text-5xl mb-4">
+        {% if request.user.user_type == 'buyer' %}💬{% else %}📩{% endif %}
+      </div>
+
+      <h3 class="text-lg font-semibold text-slate-900 mb-2">
+        {% if request.user.user_type == 'buyer' %}
+          No conversations yet
+        {% else %}
+          No messages from buyers
+        {% endif %}
+      </h3>
+
+      <p class="text-sm text-slate-500 mb-6">
+        {% if request.user.user_type == 'buyer' %}
+          Browse products and message farmers to get started.
+        {% else %}
+          Buyers will message you when they're interested in your products.
+        {% endif %}
+      </p>
+
+      {% if request.user.user_type == 'buyer' %}
+        <a href="{% url 'marketplace' %}"
+           class="inline-flex items-center rounded-xl
+                  bg-gradient-to-r from-emerald-600 to-green-600
+                  px-5 py-2.5 text-sm font-semibold text-white
+                  shadow-lg hover:shadow-xl transition">
+          Browse Marketplace
+        </a>
+      {% endif %}
+
+    </div>
+
+  {% endif %}
+
+</section>
+{% endblock %}

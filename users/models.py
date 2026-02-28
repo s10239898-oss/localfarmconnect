@@ -174,3 +174,122 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - {self.rating}/5"
+
+
+# ==========================
+# MESSAGING SYSTEM
+# ==========================
+
+class Conversation(models.Model):
+    buyer = models.ForeignKey(
+        'User', 
+        on_delete=models.CASCADE, 
+        related_name="buyer_conversations",
+        limit_choices_to={'user_type': 'buyer'}
+    )
+    farmer = models.ForeignKey(
+        'User', 
+        on_delete=models.CASCADE, 
+        related_name="farmer_conversations",
+        limit_choices_to={'user_type': 'farmer'}
+    )
+    product = models.ForeignKey(
+        'Product', 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True,
+        related_name="conversations"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("buyer", "farmer", "product")
+        ordering = ['-updated_at']
+        indexes = [
+            models.Index(fields=['buyer', '-updated_at']),
+            models.Index(fields=['farmer', '-updated_at']),
+            models.Index(fields=['product']),
+        ]
+
+    def __str__(self):
+        product_name = f" about {self.product.name}" if self.product else ""
+        return f"Conversation: {self.buyer.username} ↔ {self.farmer.username}{product_name}"
+
+    def clean(self):
+        if self.buyer == self.farmer:
+            raise ValidationError("Buyer and farmer cannot be the same user.")
+        
+        if self.buyer.user_type != 'buyer':
+            raise ValidationError("First participant must be a buyer.")
+        
+        if self.farmer.user_type != 'farmer':
+            raise ValidationError("Second participant must be a farmer.")
+
+    def other_participant(self, user):
+        """Return the other participant in the conversation"""
+        if user == self.buyer:
+            return self.farmer
+        elif user == self.farmer:
+            return self.buyer
+        return None
+
+    @property
+    def last_message(self):
+        """Get the most recent message"""
+        return self.messages.last()
+
+    def unread_count(self, user):
+        """Count unread messages for a specific user"""
+        return self.messages.filter(is_read=False).exclude(sender=user).count()
+
+
+class Message(models.Model):
+    conversation = models.ForeignKey(
+        Conversation, 
+        on_delete=models.CASCADE, 
+        related_name="messages"
+    )
+    sender = models.ForeignKey('User', on_delete=models.CASCADE)
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["timestamp"]
+        indexes = [
+            models.Index(fields=['conversation', 'timestamp']),
+            models.Index(fields=['sender']),
+            models.Index(fields=['is_read']),
+        ]
+
+    def __str__(self):
+        return f"Message from {self.sender.username} at {self.timestamp.strftime('%H:%M')}"
+
+    def clean(self):
+        # Validate sender is part of the conversation
+        if self.sender not in [self.conversation.buyer, self.conversation.farmer]:
+            raise ValidationError("Sender must be a participant in the conversation.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+        
+        # Update conversation timestamp
+        self.conversation.save()
+
+    def mark_as_read(self):
+        """Mark message as read"""
+        if not self.is_read:
+            self.is_read = True
+            super().save(update_fields=['is_read'])
+
+    @property
+    def is_from_buyer(self):
+        """Check if message is from buyer"""
+        return self.sender == self.conversation.buyer
+
+    @property
+    def is_from_farmer(self):
+        """Check if message is from farmer"""
+        return self.sender == self.conversation.farmer

@@ -72,10 +72,12 @@
             <a href="{% url 'marketplace' %}" class="text-slate-700 hover:text-emerald-700">Marketplace</a>
             <a href="{% url 'cart' %}" class="text-slate-700 hover:text-emerald-700">Cart</a>
             <a href="{% url 'buyer-orders' %}" class="text-slate-700 hover:text-emerald-700">My Orders</a>
+            <a href="{% url 'conversation-list' %}" class="text-slate-700 hover:text-emerald-700">Messages</a>
             <a href="{% url 'dashboard' %}" class="text-slate-700 hover:text-emerald-700">Dashboard</a>
           {% elif request.user.user_type == 'farmer' %}
             <a href="{% url 'farmer-products' %}" class="text-slate-700 hover:text-emerald-700">My Products</a>
             <a href="{% url 'farmer-orders' %}" class="text-slate-700 hover:text-emerald-700">Orders</a>
+            <a href="{% url 'conversation-list' %}" class="text-slate-700 hover:text-emerald-700">Messages</a>
             <a href="{% url 'dashboard' %}" class="text-slate-700 hover:text-emerald-700">Dashboard</a>
           {% endif %}
           <form method="post" action="{% url 'logout' %}" class="inline">

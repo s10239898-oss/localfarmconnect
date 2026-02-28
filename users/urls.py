@@ -36,4 +36,10 @@ urlpatterns = [
     path('farmer/orders/', views.FarmerOrderListView.as_view(), name='farmer-orders'),
     path('farmer/orders/<int:pk>/', views.FarmerOrderDetailView.as_view(), name='farmer-order-detail'),
     path('farmer/orders/<int:pk>/status/', views.FarmerOrderStatusUpdateView.as_view(), name='farmer-order-status'),
+
+    # Messaging system
+    path('messages/', views.ConversationListView.as_view(), name='conversation-list'),
+    path('messages/<int:pk>/', views.ConversationDetailView.as_view(), name='conversation-detail'),
+    path('messages/<int:pk>/send/', views.MessageCreateView.as_view(), name='message-create'),
+    path('products/<int:product_id>/message/', views.start_product_conversation, name='start-conversation'),
 ]
